@@ -1,5 +1,5 @@
 /* Servicios Quintana LLC — digital business card
-   Language switch, Zelle copy, share. No dependencies. */
+   Language switch, dark/light mode, Zelle copy, share, back to top. No dependencies. */
 (function () {
   'use strict';
 
@@ -107,6 +107,29 @@
     } else {
       copy(url).then(function () { toast(s.linkCopied); }, function () { toast(url); });
     }
+  });
+
+  /* ---------- Dark / light mode ---------- */
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
+  function paintThemeColor() {
+    themeMeta.setAttribute('content', root.getAttribute('data-theme') === 'light' ? '#EDF2FF' : '#071029');
+  }
+  paintThemeColor();
+  document.getElementById('theme').addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    if (next === 'light') { root.setAttribute('data-theme', 'light'); } else { root.removeAttribute('data-theme'); }
+    try { localStorage.setItem('sq_theme', next); } catch (e) { /* private mode */ }
+    paintThemeColor();
+  });
+
+  /* ---------- Back to top ---------- */
+  var toTop = document.getElementById('toTop');
+  function onScroll() { toTop.classList.toggle('show', window.scrollY > 500); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  toTop.addEventListener('click', function () {
+    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' });
   });
 
   document.getElementById('year').textContent = new Date().getFullYear();
