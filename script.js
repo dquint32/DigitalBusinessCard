@@ -1,164 +1,113 @@
-document.getElementById('year').textContent = new Date().getFullYear();
-
-// ── Dark Mode Toggle ────────────────────────────────────────
-function toggleDark() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('sq_theme', isDark ? 'dark' : 'light');
-}
-
+/* Servicios Quintana LLC — digital business card
+   Language switch, Zelle copy, share. No dependencies. */
 (function () {
-  const saved = localStorage.getItem('sq_theme');
-  if (saved === 'light') {
-    document.body.classList.remove('dark-mode');
-  } else {
-    document.body.classList.add('dark-mode'); 
-  }
-})();
+  'use strict';
 
-// ── Language Toggle ─────────────────────────────────────────
-function toggleLang() {
-  const html  = document.documentElement;
-  const body  = document.body;
-  const btn   = document.getElementById('langToggle');
-  const isEN  = body.getAttribute('data-lang') === 'en';
-  const newLang = isEN ? 'es' : 'en';
+  var root = document.documentElement;
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
 
-  body.setAttribute('data-lang', newLang);
-  html.setAttribute('lang', newLang);
-  if(btn) btn.querySelector('.lang-label').textContent = isEN ? 'EN' : 'ES';
-  localStorage.setItem('sq_lang', newLang);
-  applyLang(newLang);
-}
-
-function applyLang(lang) {
-  document.querySelectorAll('[data-en]').forEach(el => {
-    const txt = el.getAttribute(`data-${lang}`);
-    if (txt !== null) el.textContent = txt;
-  });
-}
-
-(function () {
-  const saved = localStorage.getItem('sq_lang') || 'en';
-  document.body.setAttribute('data-lang', saved);
-  document.documentElement.setAttribute('lang', saved);
-  const btn = document.getElementById('langToggle');
-  if(btn) btn.querySelector('.lang-label').textContent = saved === 'en' ? 'ES' : 'EN';
-  if (saved !== 'en') applyLang(saved);
-})();
-
-// ── Service Modal Data ───────────────────────────────────────
-const modalData = {
-  notary: {
+  var STRINGS = {
     en: {
-      title: 'Notary & Signing',
-      body:  'We provide certified mobile notary services across the Denver Metro area. Our services include acknowledgments, jurats, oaths, affirmations, power of attorney, real estate documents, loan signings, affidavits, and more. We bring the notary to you.'
+      title: 'David Quintana — Servicios Quintana LLC',
+      copied: 'Zelle number copied: 303-500-4122',
+      copyFailed: 'Zelle number: 303-500-4122',
+      linkCopied: 'Link copied',
+      shareText: 'Notary services, DMV help, certified translations and web development in Denver, CO'
     },
     es: {
-      title: 'Notaría y Firma',
-      body:  'Ofrecemos servicios de notaría móvil certificada en el área metropolitana de Denver. Nuestros servicios incluyen reconocimientos, juramentos, poderes notariales, documentos de bienes raíces, firmas de préstamos y más. Llevamos el notario a su ubicación.'
-    },
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`
-  },
-  dmv: {
-    en: {
-      title: 'DMV Assistance',
-      body:  'Navigating the DMV can be confusing. We assist with vehicle title transfers, new registrations, plate renewals, bill of sale preparation, and general DMV guidance. We speak Spanish and English — no confusion, no stress.'
-    },
-    es: {
-      title: 'Asistencia en DMV',
-      body:  'Tramitar en el DMV puede ser complicado. Te ayudamos con transferencias de título, nuevas registraciones, renovación de placas, preparación de contratos de venta y orientación general. Hablamos español e inglés — sin confusiones, sin estrés.'
-    },
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`
-  },
-  translation: {
-    en: {
-      title: 'Certified Translations',
-      body:  'We provide accurate certified Spanish ↔ English translations for birth certificates, marriage certificates, diplomas, transcripts, immigration documents, contracts, and business documents. All translations come with a signed certificate of accuracy.'
-    },
-    es: {
-      title: 'Traducciones Certificadas',
-      body:  'Ofrecemos traducciones certificadas precisas español ↔ inglés para actas de nacimiento, actas de matrimonio, diplomas, expedientes académicos, documentos de inmigración y contratos. Todas incluyen un certificado firmado de precisión.'
-    },
-    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>`
-  }
-};
-
-// ── Modal Open/Close ─────────────────────────────────────────
-function openModal(key) {
-  const lang    = document.body.getAttribute('data-lang') || 'en';
-  const data    = modalData[key];
-  if (!data) return;
-
-  const localized = data[lang] || data.en;
-  document.getElementById('modalTitle').textContent  = localized.title;
-  document.getElementById('modalBody').textContent   = localized.body;
-  document.getElementById('modalIcon').innerHTML     = data.icon;
-
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
-
-// ── Zelle Phone Copy ─────────────────────────────────────────
-function copyZelle() {
-  const phone = '303-500-4122';
-  navigator.clipboard.writeText(phone).then(() => {
-    showToast();
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = phone;
-    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast();
-  });
-}
-
-function showToast() {
-  const toast = document.getElementById('toastMessage');
-  const lang  = document.body.getAttribute('data-lang') || 'en';
-  toast.textContent = lang === 'es' ? '✓ ¡Número copiado!' : '✓ Number copied!';
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2800);
-}
-
-// ── Web Share API ────────────────────────────────────────────
-function sharePage() {
-  const lang     = document.body.getAttribute('data-lang') || 'en';
-  const shareData = {
-    title: 'Servicios Quintana LLC',
-    text:  lang === 'es'
-      ? 'Notaría, DMV, Traducciones y más — Denver Metro, CO'
-      : 'Notary, DMV, Translations & more — Denver Metro, CO',
-    url:   window.location.href
+      title: 'David Quintana — Servicios Quintana LLC',
+      copied: 'Número de Zelle copiado: 303-500-4122',
+      copyFailed: 'Número de Zelle: 303-500-4122',
+      linkCopied: 'Enlace copiado',
+      shareText: 'Servicios de Notaría, ayuda con el DMV, traducciones certificadas y desarrollo web en Denver, CO'
+    }
   };
 
-  if (navigator.share) {
-    navigator.share(shareData).catch(console.error);
-  } else {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      alert(lang === 'es' ? '✓ Enlace copiado' : '✓ Link copied');
+  function currentLang() { return root.lang === 'es' ? 'es' : 'en'; }
+
+  /* ---------- Language ---------- */
+  function applyLang(lang) {
+    root.lang = lang;
+    document.title = STRINGS[lang].title;
+
+    document.querySelectorAll('[data-en]').forEach(function (el) {
+      el.textContent = el.getAttribute('data-' + lang);
+    });
+    document.querySelectorAll('[data-href-en]').forEach(function (el) {
+      el.href = el.getAttribute('data-href-' + lang);
+    });
+    document.querySelectorAll('[data-label-en]').forEach(function (el) {
+      el.setAttribute('aria-label', el.getAttribute('data-label-' + lang));
+    });
+    document.querySelectorAll('.lang button').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.dataset.lang === lang));
     });
   }
-}
 
-// ── Scroll to Top Visibility ─────────────────────────────────
-const backToTopBtn = document.getElementById('backToTop');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 300) {
-    backToTopBtn.classList.add('show');
-  } else {
-    backToTopBtn.classList.remove('show');
+  function setLang(lang, animate) {
+    try { localStorage.setItem('sq_lang', lang); } catch (e) { /* private mode */ }
+    if (!animate || lang === currentLang()) { applyLang(lang); return; }
+    root.classList.add('is-swapping');
+    setTimeout(function () {
+      applyLang(lang);
+      root.classList.remove('is-swapping');
+    }, 160);
   }
-});
+
+  var saved = null;
+  try { saved = localStorage.getItem('sq_lang'); } catch (e) { /* private mode */ }
+  var initial = saved || ((navigator.language || 'en').toLowerCase().indexOf('es') === 0 ? 'es' : 'en');
+  applyLang(initial);
+
+  document.querySelectorAll('.lang button').forEach(function (btn) {
+    btn.addEventListener('click', function () { setLang(btn.dataset.lang, true); });
+  });
+
+  /* ---------- Toast ---------- */
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3000);
+  }
+
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok ? resolve() : reject();
+    });
+  }
+
+  /* ---------- Zelle: copy the number ---------- */
+  document.getElementById('zelle').addEventListener('click', function () {
+    var s = STRINGS[currentLang()];
+    copy('303-500-4122').then(
+      function () { toast(s.copied); },
+      function () { toast(s.copyFailed); }
+    );
+  });
+
+  /* ---------- Share ---------- */
+  document.getElementById('share').addEventListener('click', function () {
+    var s = STRINGS[currentLang()];
+    var url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'Servicios Quintana LLC', text: s.shareText, url: url }).catch(function () {});
+    } else {
+      copy(url).then(function () { toast(s.linkCopied); }, function () { toast(url); });
+    }
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
